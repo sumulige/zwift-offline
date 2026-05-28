@@ -213,6 +213,7 @@ class AnonUser(User, AnonymousUserMixin, db.Model):
     first_name = "z"
     last_name = "offline"
     enable_ghosts = os.path.isfile(ENABLEGHOSTS_FILE)
+    is_admin = False
 
     def is_authenticated(self):
         return True
@@ -1264,7 +1265,7 @@ def user_home(username):
         is_admin=current_user.is_admin,
         restarting=restarting,
         restarting_in_minutes=restarting_in_minutes,
-        active_workout_provider=resolve_workout_provider_for_player(current_user.player_id),
+        active_workout_provider=provider,
         workout_sync_status=current_workout_sync_status(current_user.player_id),
     )
 
