@@ -1250,6 +1250,11 @@ def trainingpeaks_sync(username):
 @app.route("/user/<username>/")
 @login_required
 def user_home(username):
+    provider = resolve_workout_provider_for_player(current_user.player_id)
+    if provider == 'intervals-icu':
+        sync_intervals_workout_for_player(current_user.player_id)
+    elif provider == 'trainingpeaks':
+        sync_trainingpeaks_workout_for_player(current_user.player_id)
     return render_template(
         "user_home.html",
         username=current_user.username,
@@ -4643,8 +4648,7 @@ def launch_zwift():
         if MULTIPLAYER:
             return redirect(url_for('login'))
         else:
-            return render_template("user_home.html", username=current_user.username, enable_ghosts=os.path.exists(ENABLEGHOSTS_FILE), online=get_online(),
-                climbs=CLIMBS, is_admin=False, restarting=restarting, restarting_in_minutes=restarting_in_minutes)
+            return redirect(url_for('user_home', username=current_user.username))
     else:
         if MULTIPLAYER:
             return redirect("http://zwift/?code=zwift_refresh_token%s" % fake_refresh_token_with_session_cookie(request.cookies.get('remember_token')), 302)
@@ -4744,14 +4748,6 @@ def start_zwift():
     selected_climb = request.form['climb']
     if selected_climb != 'CALENDAR':
         climb_override[request.remote_addr] = selected_climb
-    provider = resolve_workout_provider_for_player(current_user.player_id)
-    sync_result = None
-    if provider == 'intervals-icu':
-        sync_result = sync_intervals_workout_for_player(current_user.player_id)
-    elif provider == 'trainingpeaks':
-        sync_result = sync_trainingpeaks_workout_for_player(current_user.player_id)
-    if sync_result and sync_result['status'] in ('synced', 'no_workout', 'error'):
-        flash(sync_result['message'])
     return redirect("/ride", 302)
 
 
