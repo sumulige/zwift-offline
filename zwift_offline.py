@@ -65,7 +65,7 @@ import online_sync
 import intervals_workouts
 import trainingpeaks_workouts
 import workout_state
-import local_zwift_workouts
+import workouts_manifest
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
 logger = logging.getLogger('zoffline')
@@ -882,6 +882,19 @@ def save_player_zfile(player_id, folder, filename, content):
     return row
 
 
+def update_workouts_manifest(player_id, folder, filename, content):
+    workouts_manifest.upsert_manifest_entry(os.path.join(STORAGE_DIR, str(player_id), folder), filename, content)
+    timestamp = int(time.time())
+    row = Zfile.query.filter_by(folder=folder, filename=workouts_manifest.MANIFEST_FILENAME, player_id=player_id).first()
+    if not row:
+        row = Zfile(folder=folder, filename=workouts_manifest.MANIFEST_FILENAME, timestamp=timestamp, player_id=player_id)
+        db.session.add(row)
+    else:
+        row.timestamp = timestamp
+    db.session.commit()
+    return row
+
+
 def remove_player_zfiles_by_prefix(player_id, folder, prefix):
     rows = Zfile.query.filter_by(folder=folder, player_id=player_id)
     removed = False
@@ -949,18 +962,6 @@ def resolve_workout_provider_for_player(player_id):
     return workout_state.resolve_active_provider(load_active_workout_provider(player_id), available_workout_providers_for_player(player_id))
 
 
-def local_zwift_workouts_root():
-    return os.path.expanduser('~/Documents/Zwift/Workouts')
-
-
-def export_local_zwift_workout(player_id, filename, content):
-    return local_zwift_workouts.export_workout(local_zwift_workouts_root(), player_id, filename, content)
-
-
-def remove_local_zwift_workouts_by_prefixes(player_id, prefixes):
-    return local_zwift_workouts.remove_prefixed_workouts(local_zwift_workouts_root(), player_id, prefixes)
-
-
 def managed_workout_prefixes(provider):
     if provider == 'intervals-icu':
         return {'intervals-icu-'}
@@ -974,7 +975,7 @@ def clear_managed_workouts_for_provider(player_id, provider, clear_metadata=True
     for prefix in prefixes:
         remove_player_zfiles_by_prefix(player_id, 'customworkouts', prefix)
     if prefixes:
-        remove_local_zwift_workouts_by_prefixes(player_id, prefixes)
+        workouts_manifest.remove_prefixed_workouts(os.path.join(STORAGE_DIR, str(player_id), 'customworkouts'), prefixes)
     if provider == 'intervals-icu' and clear_metadata:
         clear_intervals_workout_metadata(player_id)
 
@@ -989,17 +990,18 @@ def current_workout_sync_status(player_id, provider=None):
             'provider': provider,
             'metadata': None,
             'server_file_exists': False,
-            'local_status': None,
+            'manifest_status': None,
         }
     filename = metadata.get('filename')
-    server_file = os.path.join(STORAGE_DIR, str(player_id), 'customworkouts', filename) if filename else ''
-    local_status = local_zwift_workouts.health_report(local_zwift_workouts_root(), player_id, filename) if filename else None
+    workouts_dir = os.path.join(STORAGE_DIR, str(player_id), 'customworkouts')
+    server_file = os.path.join(workouts_dir, filename) if filename else ''
+    manifest_status = workouts_manifest.health_report(workouts_dir, filename) if filename else None
     return {
         'provider': provider,
         'metadata': metadata,
         'server_file_exists': bool(filename and os.path.exists(server_file)),
         'server_file': server_file,
-        'local_status': local_status,
+        'manifest_status': manifest_status,
     }
 
 
@@ -1025,7 +1027,7 @@ def sync_intervals_workout_for_player(player_id):
     def store_workout(filename, content, event):
         clear_managed_workouts_for_provider(player_id, 'intervals-icu', clear_metadata=False)
         stored['zfile'] = save_player_zfile(player_id, 'customworkouts', filename, content)
-        stored['local_export'] = export_local_zwift_workout(player_id, filename, content)
+        update_workouts_manifest(player_id, 'customworkouts', filename, content)
         stored['metadata'] = save_intervals_workout_metadata(player_id, event, filename)
 
     try:
@@ -1041,7 +1043,6 @@ def sync_intervals_workout_for_player(player_id):
             sync_status = current_workout_sync_status(player_id, 'intervals-icu')
             return {
                 **result,
-                'local_export': stored.get('local_export'),
                 'sync_status': sync_status,
                 'message': '%s Local Zwift workout catalog prepared.' % result['message'],
             }
@@ -1079,11 +1080,10 @@ def sync_trainingpeaks_workout_for_player(player_id):
 
     activate_workout_provider(player_id, 'trainingpeaks')
     clear_managed_workouts_for_provider(player_id, 'trainingpeaks', clear_metadata=False)
-    exports = []
 
     def store_workout(filename, content, workout):
         save_player_zfile(player_id, 'customworkouts', filename, content)
-        exports.append(export_local_zwift_workout(player_id, filename, content))
+        update_workouts_manifest(player_id, 'customworkouts', filename, content)
 
     try:
         result = trainingpeaks_workouts.sync_exported_workouts(folder, store_workout)
@@ -1096,7 +1096,6 @@ def sync_trainingpeaks_workout_for_player(player_id):
         if result['status'] == 'synced':
             return {
                 **result,
-                'local_exports': exports,
                 'message': '%s Local Zwift workout catalog prepared.' % result['message'],
             }
         return result
