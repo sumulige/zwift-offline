@@ -1045,7 +1045,7 @@ def sync_intervals_workout_for_player(player_id):
             return {
                 **result,
                 'sync_status': sync_status,
-                'message': '%s Local Zwift workout catalog prepared.' % result['message'],
+                'message': '%s Workout catalog prepared.' % result['message'],
             }
         return result
     except Exception as exc:
@@ -1097,7 +1097,7 @@ def sync_trainingpeaks_workout_for_player(player_id):
         if result['status'] == 'synced':
             return {
                 **result,
-                'message': '%s Local Zwift workout catalog prepared.' % result['message'],
+                'message': '%s Workout catalog prepared.' % result['message'],
             }
         return result
     except Exception as exc:
