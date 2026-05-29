@@ -464,6 +464,11 @@
     "road": 70,
     "time": 134959
   },
+  "-1375227966": {
+    "name": "Makuri Islands - Roundikaze",
+    "road": 129,
+    "time": 250890
+  },
   "-691331742": {
     "name": "Makuri Islands - Sea to Tree",
     "road": 0,
@@ -514,6 +519,11 @@
     "road": 4,
     "time": 872173
   },
+  "362278484": {
+    "name": "Makuri Islands - Twilight Crit",
+    "road": 4,
+    "time": 873144
+  },
   "1457923570": {
     "name": "Makuri Islands - Twilight Harbor",
     "road": 4,
@@ -524,6 +534,11 @@
     "road": 0,
     "time": 880596
   },
+  "-202736804": {
+    "name": "Makuri Islands - Urumaze",
+    "road": 129,
+    "time": 250890
+  },
   "1941800093": {
     "name": "Makuri Islands - Valley to Mountaintop",
     "road": 0,
@@ -533,6 +548,11 @@
     "name": "Makuri Islands - Wandering Flats",
     "road": 0,
     "time": 297800
+  },
+  "811898717": {
+    "name": "Makuri Islands - WhatYumeziWereLost",
+    "road": 73,
+    "time": 143208
   },
   "152965568": {
     "name": "Makuri Islands - Yoru Run",
@@ -804,6 +824,36 @@
     "road": 0,
     "time": 485875
   },
+  "-59983043": {
+    "name": "Paris - Cirque du Suffer",
+    "road": 0,
+    "time": 972899
+  },
+  "-1153887298": {
+    "name": "Paris - Cr\u00c3\u00aape Escape",
+    "road": 0,
+    "time": 485874
+  },
+  "1365497350": {
+    "name": "Paris - Double Espresso",
+    "road": 0,
+    "time": 485874
+  },
+  "565111133": {
+    "name": "Paris - Heart of Montmartre",
+    "road": 0,
+    "time": 485874
+  },
+  "870135081": {
+    "name": "Paris - La Boucle",
+    "road": 0,
+    "time": 485874
+  },
+  "-913743341": {
+    "name": "Paris - Loop de loop de loop",
+    "road": 0,
+    "time": 485874
+  },
   "1236439870": {
     "name": "Paris - Lutece Express",
     "road": 0,
@@ -813,6 +863,26 @@
     "name": "Paris - Lutece Express Run",
     "road": 0,
     "time": 485875
+  },
+  "1247427185": {
+    "name": "Paris - Montmartre Mixer",
+    "road": 0,
+    "time": 485874
+  },
+  "2128895616": {
+    "name": "Paris - Paris Pacer",
+    "road": 0,
+    "time": 888371
+  },
+  "-1489331213": {
+    "name": "Paris - Paris Toujours",
+    "road": 0,
+    "time": 485874
+  },
+  "-1978050323": {
+    "name": "Paris - Rues in Rythme",
+    "road": 0,
+    "time": 36583
   },
   "-2098947784": {
     "name": "Richmond - 2015 Worlds Course",
